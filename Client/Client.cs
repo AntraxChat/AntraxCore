@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,9 @@ namespace AntraxClient
         public static string dGeneral      = $"{dUser}/General";
         public static string dMeta         = $"{dGeneral}/Meta";
         public static string dSetting      = $"{dGeneral}/Setting";
+
+        // Other
+        public static string dNetProp      = $"{dResource}/NetworkProperties.json";
 
         // Local Chat " ID's Database"
         public static class Chat
@@ -67,15 +71,29 @@ namespace AntraxClient
 
         static async Task Main()
         {
+            //var instance = new Json.JsonWrapper.NetworkProperties();
+            //Console.WriteLine(Json.JsonWrapper.SerializeObject(instance));
+            var response = Json.JsonWrapper.DeserializeString(await File.ReadAllTextAsync(Resource.dNetProp));
+            Console.WriteLine(response.Target.Address);
+            Console.ReadLine();
+            //..
             Util.Print.Logo();
             Util.Print.WaterMark();
+            // ----------------------------------
             Console.WriteLine("Press any key to start...");
             Console.ReadKey();
             Console.Clear();
+            // ----------------------------------
             Util.Print.Logo();
             Util.Print.WaterMark();
+            // ----------------------------------
             await DirsPathsCheck();
             await FilePathsCheck();
+            // ----------------------------------
+
+            await Network.Http.Initialize();
+            //await Network.Http.Ser();
+            Console.ReadLine();
         }
 
         static async Task DirsPathsCheck()
@@ -137,6 +155,7 @@ namespace AntraxClient
     class Network
     {
         static string BaseAddress { get; set; }
+        static TcpListener Listener { get; set; }
         public static class Http
         {
             static HttpClient client = new HttpClient();
@@ -145,27 +164,50 @@ namespace AntraxClient
             public static async Task Initialize()
             {
                 BaseAddress = await File.ReadAllTextAsync(@"NetworkProps.txt");
+                Listener = new TcpListener(214);
             }
 
-            public static async Task StartListen()
-            {
-                var thread = new Thread(async () => await Listener());
-                thread.Start();
-            }
-
-            private static async Task Listener()
-            {
-                listener.Prefixes.Add(BaseAddress);
-
-                try { listener.Start(); }
-                catch (Exception ex) { Util.Debug($"Error, Trace: {ex.Message}"); }
-                Util.Debug("Now ready to receive traces...");
-                while (true)
-                {
-                    var context = listener.GetContext();
-                    Console.WriteLine(context.Response);
-                }
-            }
+            //public class Server
+            //{
+            //    private bool _running;
+            //    public bool Running
+            //    {
+            //        get
+            //        {
+            //            return _running;
+            //        }
+            //        set
+            //        {
+            //            _running = value;
+            //        }
+            //    }
+            //    public Server()
+            //    {
+            //        Listener = new TcpListener("127.0.0.1", 12400);
+            //    }
+            //    public async void Start()
+            //    {
+            //        try
+            //        {
+            //            Listener.Start();
+            //            Running = true;
+            //            while (Running)
+            //            {
+            //                var client = await Listener.AcceptTcpClientAsync();
+            //                await Task.Run(() => //Do something);
+            //}
+            //        }
+            //        catch (SocketException)
+            //        {
+            //            throw;
+            //        }
+            //    }
+            //    public void Stop()
+            //    {
+            //        Listener.Stop();
+            //        Running = false;
+            //    }
+            //}
 
             public static async Task<string> Post(string id, string message)
             {
