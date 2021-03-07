@@ -1,3 +1,4 @@
+using AntraxClient.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,21 +8,22 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AntraxClient.Network;
 
 namespace AntraxClient
 {
     public static class Resource
     {
         // Root Directories
-        public static string dResource     = @"Resource";
-        public static string dChat         = $"{dResource}/Chat";
-        public static string dUser         = $"{dResource}/User";
-        public static string dGeneral      = $"{dUser}/General";
-        public static string dMeta         = $"{dGeneral}/Meta";
-        public static string dSetting      = $"{dGeneral}/Setting";
+        public static string dResource = @"Resource";
+        public static string dChat = $"{dResource}/Chat";
+        public static string dUser = $"{dResource}/User";
+        public static string dGeneral = $"{dUser}/General";
+        public static string dMeta = $"{dGeneral}/Meta";
+        public static string dSetting = $"{dGeneral}/Setting";
 
         // Other
-        public static string dNetProp      = $"{dResource}/NetworkProperties.json";
+        public static string dNetProp = $"{dResource}/NetworkProperties.json";
 
         // Local Chat " ID's Database"
         public static class Chat
@@ -91,7 +93,7 @@ namespace AntraxClient
             await FilePathsCheck();
             // ----------------------------------
 
-            await Network.Http.Initialize();
+            //await Network.Network.(response);
             //await Network.Http.Ser();
             Console.ReadLine();
         }
@@ -126,9 +128,9 @@ namespace AntraxClient
 
         static async Task FilePathsCheck()
         {
-            foreach(var str in FilePaths)
+            foreach (var str in FilePaths)
             {
-                if(!File.Exists(str))
+                if (!File.Exists(str))
                 {
                     Util.Debug($"File {str} did not exist, attempting to create a new one.", 2);
                     try
@@ -149,154 +151,6 @@ namespace AntraxClient
                     Util.Debug($"File {str} exists.", 1);
                 }
             }
-        }
-    }
-
-    class Network
-    {
-        static string BaseAddress { get; set; }
-        static TcpListener Listener { get; set; }
-        public static class Http
-        {
-            static HttpClient client = new HttpClient();
-            static HttpListener listener = new HttpListener();
-
-            public static async Task Initialize()
-            {
-                BaseAddress = await File.ReadAllTextAsync(Resource.dNetProp);
-                Listener = new TcpListener(214);
-            }
-
-            //public class Server
-            //{
-            //    private bool _running;
-            //    public bool Running
-            //    {
-            //        get
-            //        {
-            //            return _running;
-            //        }
-            //        set
-            //        {
-            //            _running = value;
-            //        }
-            //    }
-            //    public Server()
-            //    {
-            //        Listener = new TcpListener("127.0.0.1", 12400);
-            //    }
-            //    public async void Start()
-            //    {
-            //        try
-            //        {
-            //            Listener.Start();
-            //            Running = true;
-            //            while (Running)
-            //            {
-            //                var client = await Listener.AcceptTcpClientAsync();
-            //                await Task.Run(() => //Do something);
-            //}
-            //        }
-            //        catch (SocketException)
-            //        {
-            //            throw;
-            //        }
-            //    }
-            //    public void Stop()
-            //    {
-            //        Listener.Stop();
-            //        Running = false;
-            //    }
-            //}
-
-            public static async Task<string> Post(string id, string message)
-            {
-                var values = new Dictionary<string, string> {
-                    { "identifier", id },
-                    { "message", message }
-                };
-
-                var response = await client.PostAsync(BaseAddress, new FormUrlEncodedContent(values));
-                return await response.Content.ReadAsStringAsync();
-            }
-        }
-    }
-
-
-    class Util
-    {
-        public static class Print
-        {
-            public static void Logo()
-            {
-                var n = Environment.NewLine;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(
-                    "████████████████████████████████████████████████████████████████" + n +
-                    " ███████     ██   ████  █        █      ███     ██  ███  ██████ " + n +
-                    "  █████  ███  █    ███  ████  ████  ███  █  ███  ██  █  ██████  " + n +
-                    "   ████       █  █  ██  ████  ████      ██       ███   ██████   " + n +
-                    "  █████  ███  █  ██  █  ████  ████  ███  █  ███  ██  █  ██████   " + n +
-                    " ██████  ███  █  ███    ████  ████  ███  █  ███  █  ███  ██████ " + n +
-                    "████████████████████████████████████████████████████████████████"
-                    );
-            }
-
-            public static void WaterMark()
-            {
-                var bar = "█████████████████████████████";
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(bar);
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.BackgroundColor = ConsoleColor.Yellow;
-                Console.Write("Antrax");
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(bar+"\n");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-        }
-
-        public static string CurrentUnixTime() {
-            return DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
-        }
-
-        public static void Debug(string content, int severity = 0)
-        {
-            string prefix = null;
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write("[");
-            if (severity == 0)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                prefix = "SUCCESS";
-            }
-            else if (severity == 1)
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                prefix = "INFO";
-            }
-            else if (severity == 2)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                prefix = "WARNING";
-            }
-            else if (severity == 3)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                prefix = "ERROR";
-            }
-            else if (severity == 4)
-            {
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-                Console.ForegroundColor = ConsoleColor.Black;
-                prefix = "CRITICAL";
-            }
-            else prefix = "no prefix";
-            Console.Write(prefix);
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.Write($"] {content}\n");
         }
     }
 }
