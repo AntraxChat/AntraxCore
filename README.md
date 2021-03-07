@@ -1,5 +1,5 @@
 # AntraxProject
-![BadgeCode1](https://forthebadge.com/images/badges/made-with-c-sharp.svg) ![BadgeCode2](https://forthebadge.com/images/badges/made-with-go.svg)
+![BadgeCode1](https://forthebadge.com/images/badges/made-with-c-sharp.svg) ![BadgeCode2](https://forthebadge.com/images/badges/made-with-go.svg) ![BadgeCode2](https://forthebadge.com/images/badges/built-by-developers.svg)
 
 ## Getting Started
 To use this project, simply download the latest release version.
