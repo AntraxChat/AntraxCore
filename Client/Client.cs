@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace awesomeProject
+namespace AntraxClient
 {
     public static class Resource
     {
@@ -174,7 +174,7 @@ namespace awesomeProject
                     { "message", message }
                 };
 
-                var response = await client.PostAsync(General.BaseURL, new FormUrlEncodedContent(values));
+                var response = await client.PostAsync(BaseAddress, new FormUrlEncodedContent(values));
                 return await response.Content.ReadAsStringAsync();
             }
         }
