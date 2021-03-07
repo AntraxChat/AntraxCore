@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -163,7 +163,7 @@ namespace AntraxClient
 
             public static async Task Initialize()
             {
-                BaseAddress = await File.ReadAllTextAsync(@"NetworkProps.txt");
+                BaseAddress = "localhost"; /*await File.ReadAllTextAsync(@"NetworkProps.txt")*/;
                 Listener = new TcpListener(214);
             }
 
