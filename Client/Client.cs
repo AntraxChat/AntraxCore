@@ -163,7 +163,7 @@ namespace AntraxClient
 
             public static async Task Initialize()
             {
-                BaseAddress = "localhost"; /*await File.ReadAllTextAsync(@"NetworkProps.txt")*/;
+                BaseAddress = await File.ReadAllTextAsync(Resource.dNetProp);
                 Listener = new TcpListener(214);
             }
 
