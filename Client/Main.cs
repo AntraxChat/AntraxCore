@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,21 +43,17 @@ namespace awesomeProject
             }
         }
     }
+
     public static class GeneralProgram
     {
-        static List<string> DirPaths = new List<string>
+        static List<string> FilePaths = new List<string>
         {
-            Resource.dResource,
-            Resource.dChat,
-            Resource.Chat.GroupsChats,
-            Resource.Chat.PrivateChats,
-            Resource.dUser,
-            Resource.dGeneral,
-            Resource.dMeta,
-            Resource.dSetting,
+            Resource.User.General.Meta.Picture,
+            Resource.User.General.Meta.Username,
+            Resource.User.General.Setting.Theme,
         };
 
-        static List<string> FilePaths = new List<string>
+        static List<string> DirPaths = new List<string>
         {
             Resource.dResource,
             Resource.dChat,
@@ -82,7 +80,7 @@ namespace awesomeProject
 
         static async Task DirsPathsCheck()
         {
-            foreach (var str in RootPaths)
+            foreach (var str in DirPaths)
             {
                 if (!Directory.Exists(str))
                 {
@@ -107,9 +105,78 @@ namespace awesomeProject
             }
             return;
         }
+
         static async Task FilePathsCheck()
         {
+            foreach(var str in FilePaths)
+            {
+                if(!File.Exists(str))
+                {
+                    Util.Debug($"File {str} did not exist, attempting to create a new one.", 2);
+                    try
+                    {
+                        File.Create(str);
+                        Util.Debug($"Successfully created file {str}.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Util.Debug($"Couldn't create {str} directory.", 4);
+                        await File.WriteAllTextAsync($"DumpLog{Util.CurrentUnixTime()}.txt", $"DATE: \"{DateTime.Now}\" | EX: {ex.Message}");
+                        Thread.Sleep(5000);
+                        Environment.Exit(0);
+                    }
+                }
+                else
+                {
+                    Util.Debug($"File {str} exists.", 1);
+                }
+            }
+        }
+    }
 
+    class Network
+    {
+        static string BaseAddress { get; set; }
+        public static class Http
+        {
+            static HttpClient client = new HttpClient();
+            static HttpListener listener = new HttpListener();
+
+            public static async Task Initialize()
+            {
+                BaseAddress = await File.ReadAllTextAsync(@"NetworkProps.txt");
+            }
+
+            public static async Task StartListen()
+            {
+                var thread = new Thread(async () => await Listener());
+                thread.Start();
+            }
+
+            private static async Task Listener()
+            {
+                listener.Prefixes.Add(BaseAddress);
+
+                try { listener.Start(); }
+                catch (Exception ex) { Util.Debug($"Error, Trace: {ex.Message}"); }
+                Util.Debug("Now ready to receive traces...");
+                while (true)
+                {
+                    var context = listener.GetContext();
+                    Console.WriteLine(context.Response);
+                }
+            }
+
+            public static async Task<string> Post(string id, string message)
+            {
+                var values = new Dictionary<string, string> {
+                    { "identifier", id },
+                    { "message", message }
+                };
+
+                var response = await client.PostAsync(General.BaseURL, new FormUrlEncodedContent(values));
+                return await response.Content.ReadAsStringAsync();
+            }
         }
     }
 
