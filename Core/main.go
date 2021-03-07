@@ -13,10 +13,6 @@ type SignUp struct {
 	Message string `json:"message"`
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
-
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	var ip []string
 	ip = strings.Split(r.RemoteAddr, ":")
@@ -30,8 +26,18 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(bytes))
 }
 
+/* Still to use.
+func answer() {
+	resp, err := http.Get("http://example.com/")
+	if err != nil {
+		print(err)
+	}
+	defer resp.Body.Close()
+}
+*/
+
 func main() {
-	http.HandleFunc("/", handler)
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/register", loginHandler)
 	http.ListenAndServe(":80", nil)
 }
